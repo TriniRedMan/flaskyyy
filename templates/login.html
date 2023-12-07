@@ -1,0 +1,40 @@
+<!-- login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        /* Add any additional styles here */
+        body {
+            text-align: center;
+            padding: 50px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+    <p><span style="font-size:24px"><strong>Discover Compliance Excellence with T&amp;T Compliance Solutions: </strong></span></p>
+    <p><span style="font-size:24px"><strong>Your Partner in Ensuring Ongoing Regulatory Adherence for You and Your Organization.</strong></span></p>
+    <img src="{{ url_for('static', filename='compliance.jpg') }}" alt="IMG1" style="width: 600px; height: 300px;">
+    <p><span style="font-size:24px"><strong>Empowering Compliance, Elevating Excellence</strong></span></p>
+    <p><span style="font-size:24px"><strong>T&amp;T Compliance Solutions, Your Partner for Comprehensive Regulatory Assurance in Trinidad and Tobago.</strong></span></p>
+    <h2>Login</h2>
+    <form method="post" action="{{ url_for('login') }}">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+
+        <button type="submit">Login</button>
+    </form>
+    
+</body>
+</html>

@@ -3,13 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Upload via FTP</title>
+    <title>Name Search</title>
 </head>
 <body>
-    <h1>File Upload via FTP</h1>
-    <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="uploads">
-        <button type="submit">Upload</button>
+    <h1>Name Search</h1>
+    
+    <form action="/search" method="post">
+        <label for="search_text">Enter Name:</label>
+        <input type="text" name="search_text" required>
+        
+        <label for="selected_column">Select Column:</label>
+        <select name="selected_column" required>
+            {% for column in column_names %}
+                <option value="{{ column }}">{{ column }}</option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit">Search</button>
     </form>
+
+    {% if search_result %}
+        <h2>Search Result:</h2>
+        {{ search_result|safe }}
+    {% endif %}
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
 </body>
 </html>
