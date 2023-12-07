@@ -1,6 +1,21 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import pandas as pd
 import re
+import os
+
+def print_files_in_current_folder():
+    current_folder = os.getcwd()  # Get the current working directory
+    files = [f for f in os.listdir(current_folder) if os.path.isfile(os.path.join(current_folder, f))]
+
+    if files:
+        print("Files in the current folder:")
+        for file in files:
+            print(file)
+    else:
+        print("No files found in the current folder.")
+
+# Call the function to print files
+print_files_in_current_folder()
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Change this to a secure secret key
