@@ -64,7 +64,7 @@ def check_authentication():
         return redirect(url_for('login'))
 
 # Load the Excel file
-excel_file_path = 'entities.xlsx'
+excel_file_path = os.path.join('static', 'entities.xlsx')
 df = pd.read_excel(excel_file_path)
 
 # Get the column names for the dropdown
