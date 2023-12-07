@@ -1,51 +1,86 @@
-from flask import Flask, render_template, request
-from flask_uploads import UploadSet, configure_uploads, IMAGES
-from ftplib import FTP
-import os
+from flask import Flask, render_template, request, redirect, url_for, session
+import pandas as pd
+import re
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Change this to a secure secret key
 
-# Configure file uploads
-uploads = UploadSet("uploads", IMAGES)
-app.config["UPLOADED_UPLOADS_DEST"] = "uploads"
-configure_uploads(app, uploads)
+@app.route('/')
+def default_page():
+    return render_template('login.html')
 
-ftp_directory = "/public_html/assets"
-ftp_host = "trinicoding.com"
-ftp_user = "admin2@trinicoding.com"
-ftp_password = "Rabbit12"
+# Dummy user for demonstration purposes
+class User:
+    def __init__(self, id):
+        self.id = id
 
-def ensure_upload_directory():
-    upload_path = app.config["UPLOADED_UPLOADS_DEST"]
-    if not os.path.exists(upload_path):
-        os.makedirs(upload_path)
+# Replace this with your actual user authentication logic
+def authenticate(username, password):
+    if username == 'user' and password == 'password':
+        return User(1)
+    return None
 
-@app.route("/", methods=["GET", "POST"])
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = authenticate(username, password)
+        if user:
+            # Store user ID in the session
+            session['user_id'] = user.id
+            print(f"User {username} logged in successfully")
+            return redirect(url_for('index'))
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    # Clear the user ID from the session
+    session.pop('user_id', None)
+    print("User logged out")
+    return redirect(url_for('login'))
+
+@app.before_request
+def check_authentication():
+    if 'user_id' not in session and request.endpoint != 'login':
+        print("Redirecting to login page")
+        return redirect(url_for('login'))
+
+# Load the Excel file
+excel_file_path = 'entities.xlsx'
+df = pd.read_excel(excel_file_path)
+
+# Get the column names for the dropdown
+column_names = df.columns.tolist()
+
+@app.route('/index')
 def index():
-    if request.method == "POST" and "uploads" in request.files:
-        file = request.files["uploads"]
-        if file:
-            # Ensure the upload directory exists
-            ensure_upload_directory()
+    print("Accessing index page")
+    return render_template('index.html', column_names=column_names)
 
-            # Save the file locally
-            filename = os.path.join(app.config["UPLOADED_UPLOADS_DEST"], file.filename)
-            file.save(filename)
+@app.route('/search', methods=['POST'])
+def search():
+    search_text = request.form['search_text']
+    selected_column = request.form['selected_column']
 
-            # Upload the file to FTP
-            upload_to_ftp(filename, ftp_host, ftp_directory, ftp_user, ftp_password)
+    if not search_text or not selected_column:
+        return render_template('index.html', column_names=column_names, error="Please enter a name and select a column.")
 
-            # Remove the local file after uploading
-            os.remove(filename)
+    search_result = search_name_in_database(search_text, selected_column)
 
-    return render_template("index.html")
+    return render_template('index.html', column_names=column_names, search_result=search_result)
 
-def upload_to_ftp(local_file, ftp_server, ftp_path, username, password):
-    with FTP(ftp_server) as ftp:
-        ftp.login(username, password)
-        ftp.cwd(ftp_path)
-        with open(local_file, "rb") as file:
-            ftp.storbinary("STOR " + os.path.basename(local_file), file)
+def search_name_in_database(name, column):
+    search_name_normalized = re.sub(r'\s+', ' ', name.strip()).lower()
+
+    if column not in df.columns:
+        return f"Column '{column}' not found in the database."
+
+    column_data = df[column].fillna('').str.lower()
+    matching_results = df[column_data.str.contains(search_name_normalized)]
+
+    return matching_results.to_html(index=False)
 
 if __name__ == '__main__':
     app.run(debug=True, port=os.getenv("PORT", default=5000))
