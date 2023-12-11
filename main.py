@@ -98,5 +98,146 @@ def search_name_in_database(name, column):
 
     return matching_results.to_html(index=False)
 
+
+@app.route('/uploadpg')
+def uploadpg():
+    # Configure file uploads
+    uploads = UploadSet("uploads", IMAGES)
+    app.config["UPLOADED_UPLOADS_DEST"] = "uploads"
+    configure_uploads(app, uploads)
+
+    webdav_url = "http://127.0.0.1:4443"  # Replace with your WebDAV server URL
+    webdav_user = "rabbitmasterjohnny@gmail.com"
+    webdav_password = "Rabbit123"
+    webdav_path = "/dS0kAACD/megastuff"
+    documents_path = os.path.expanduser("~/Documents")
+
+    def ensure_upload_directory():
+        upload_path = app.config["UPLOADED_UPLOADS_DEST"]
+        if not os.path.exists(upload_path):
+            os.makedirs(upload_path)
+
+    def upload_to_webdav(local_file, webdav_url, webdav_path, username, password):
+        options = {
+            "webdav_hostname": webdav_url,
+            "webdav_login": username,
+            "webdav_password": password,
+            "webdav_root": webdav_path,
+        }
+
+        client = Client(options)
+        try:
+            client.upload_sync(remote_path=os.path.basename(local_file), local_path=local_file)
+            return True
+        except Exception as e:
+            print(f"Error uploading file: {e}")
+            return False
+
+    def download_from_webdav(remote_file, webdav_url, webdav_path, username, password, local_path):
+        options = {
+            "webdav_hostname": webdav_url,
+            "webdav_login": username,
+            "webdav_password": password,
+            "webdav_root": webdav_path,
+        }
+
+        client = Client(options)
+        try:
+            client.download_sync(remote_path=remote_file, local_path=local_path)
+            print(f"File downloaded to {local_path}")
+        except Exception as e:
+            print(f"Error downloading file: {e}")
+
+    def save_columns_to_file(selected_columns, filename='columns.txt'):
+        try:
+            with open(filename, 'w') as file:
+                for column in selected_columns:
+                    file.write(f"{column}\n")
+            print(f"Columns saved to {filename}")
+        except Exception as e:
+            print(f"Error saving columns to file: {e}")
+        
+
+    @app.route("/", methods=["GET", "POST"])
+    def index():
+        if request.method == "POST" and "uploads" in request.files:
+            file = request.files["uploads"]
+            if file:
+                # Ensure the upload directory exists
+                ensure_upload_directory()
+
+                # Save the file locally
+                filename = os.path.join(app.config["UPLOADED_UPLOADS_DEST"], file.filename)
+                file.save(filename)
+
+                # Get the selected columns from the form
+                selected_columns = request.form.getlist("selected_columns")
+
+                # Save the selected columns to a text file
+                save_columns_to_file(selected_columns)
+
+                # Upload the file to WebDAV
+                success = upload_to_webdav(filename, webdav_url, webdav_path, webdav_user, webdav_password)
+
+                # Remove the local file after uploading
+                os.remove(filename)
+
+                # Check if the upload was successful
+                if success:
+                    # Redirect to the comparison page with the uploaded file name
+                    return redirect(url_for("compare", filename=file.filename))
+
+        return render_template("index.html")
+
+    def load_columns_from_file(filename='columns.txt'):
+        with open(filename, 'r') as file:
+            columns = [line.strip() for line in file]
+        return columns
+
+    @app.route("/compare/<filename>", methods=["GET", "POST"])
+    def compare(filename):
+        # Load the selected columns from the text file
+        selected_columns = load_columns_from_file()
+
+        # Construct the WebDAV path for the uploaded file
+        remote_file_path = os.path.join(webdav_path, filename)
+
+        # Download the uploaded file to the Documents folder
+        download_path_uploaded = os.path.join(documents_path, filename)
+        download_from_webdav(filename, webdav_url, webdav_path, webdav_user, webdav_password, download_path_uploaded)
+
+        # Load the uploaded Excel file
+        df_uploaded = pd.read_excel(download_path_uploaded)
+
+        # Get the column names for the uploaded file dropdown
+        column_names_uploaded = df_uploaded.columns.tolist()
+
+        # Load the entities Excel file for column selection
+        entities_file_path = 'entities.xlsx'
+        df_entities = pd.read_excel(entities_file_path)
+
+        # Get the column names for the entities file dropdown
+        column_names_entities = df_entities.columns.tolist()
+
+        if request.method == "POST":
+            # Get selected columns from the form
+            selected_column_uploaded = request.form["selected_column"]
+            selected_column_entities = request.form["selected_column_entities"]
+
+            # Add the selected columns to the list
+            selected_columns.extend([selected_column_uploaded, selected_column_entities])
+
+            # Save the updated columns to the text file
+            save_columns_to_file(selected_columns)
+
+            # Upload the updated columns file to WebDAV
+            upload_to_webdav('columns.txt', webdav_url, webdav_path, webdav_user, webdav_password)
+
+
+        return render_template("compare.html", filename=filename, column_names=column_names_uploaded, column_names_entities=column_names_entities)
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=os.getenv("PORT", default=5000))
