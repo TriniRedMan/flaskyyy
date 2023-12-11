@@ -98,6 +98,11 @@ def search_name_in_database(name, column):
 
     return matching_results.to_html(index=False)
 
+@app.route('/bulk_upload')
+def bulk_upload():
+    return redirect(url_for('uploadpg'))
+    
+
 
 @app.route('/uploadpg')
 def uploadpg():
