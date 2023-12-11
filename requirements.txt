@@ -9,4 +9,5 @@ Flask-Reuploaded
 pandas
 openpyxl
 webdavclient3
+PyGithub
 
