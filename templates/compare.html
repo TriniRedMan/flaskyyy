@@ -1,0 +1,47 @@
+<!-- compare.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare</title>
+</head>
+<body>
+    <h2>Compare</h2>
+    <p>File: {{ filename }}</p>
+
+    <form method="post">
+        <label for="selected_column_uploaded">Select Column (Uploaded File):</label>
+        <select id="selected_column_uploaded" name="selected_column">
+            {% for column in column_names %}
+                <option value="{{ column }}">{{ column }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="selected_column_entities">Select Column (Entities File):</label>
+        <select id="selected_column_entities" name="selected_column_entities">
+            {% for column in column_names_entities %}
+                <option value="{{ column }}">{{ column }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Search</button>
+    </form>
+
+    {% if search_result %}
+        {% if search_result != "No matches found." %}
+            <h3>Search Result:</h3>
+            <div>
+                <h4>Uploaded File Matches:</h4>
+                {{ search_result.uploaded_results | safe }}
+            </div>
+            <div>
+                <h4>Entities File Matches:</h4>
+                {{ search_result.entities_results | safe }}
+            </div>
+        {% else %}
+            <p>{{ search_result }}</p>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
