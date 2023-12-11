@@ -106,7 +106,7 @@ uploads = UploadSet("uploads", IMAGES)
 app.config["UPLOADED_UPLOADS_DEST"] = "uploads"
 configure_uploads(app, uploads)
 
-webdav_url = "http://127.0.0.1:4443"  # Replace with your WebDAV server URL
+webdav_url = "http://127.0.0.1:4443/dS0kAACD/megastuff"  # Replace with your WebDAV server URL
 webdav_user = "rabbitmasterjohnny@gmail.com"
 webdav_password = "Rabbit123"
 webdav_path = "/dS0kAACD/megastuff"
