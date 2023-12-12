@@ -285,7 +285,7 @@ def compare(filename):
     # Get the column names for the entities file dropdown
     column_names_entities = df_entities.columns.tolist()
 
-    return render_template("compare.html", filename=filename, column_names_uploaded=column_names_uploaded, column_names_entities=column_names_entities,
+return render_template("compare.html", filename=filename, column_names_uploaded=column_names_uploaded, column_names_entities=column_names_entities,
                            selected_column_uploaded=selected_column_uploaded, selected_column_entities=selected_column_entities)
 
 
