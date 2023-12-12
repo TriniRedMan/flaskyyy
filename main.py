@@ -1,5 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file, Response, stream_with_context
 from flask_uploads import UploadSet, configure_uploads, IMAGES
+import requests
+from io import BytesIO
+import tempfile
+
+
 
 import pandas as pd
 import re
@@ -341,19 +346,30 @@ def download_file():
 
         client = Client(options)
         remote_path = os.path.join(webdav_path, file_to_download).replace("\\", "/")
-        local_path = os.path.join(documents_path, file_to_download)
 
-        # Download the file from WebDAV to the local path
-        client.download_sync(remote_path=remote_path, local_path=local_path)
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            local_path = temp_file.name
 
-        # Provide the local path for the file to be sent to the user
-        return send_file(local_path, as_attachment=True)
+            # Download the file from WebDAV synchronously
+            client.download_sync(remote_path, local_path)
+
+            # Read the content of the temporary file into memory
+            with open(local_path, 'rb') as file:
+                file_content = file.read()
+
+        # Remove the temporary file
+        os.remove(local_path)
+
+        # Create a BytesIO object to stream the file
+        file_stream = BytesIO(file_content)
+
+        # Provide the BytesIO object for the file to be sent to the user
+        return send_file(file_stream, as_attachment=True, download_name=file_to_download)
 
     except Exception as e:
         print(f"Error downloading file: {e}")
         return "Error downloading file"
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, port=os.getenv("PORT", default=5000))
