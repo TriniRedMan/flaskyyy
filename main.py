@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, session,jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 
 import pandas as pd
@@ -6,8 +7,6 @@ import re
 import os
 import openpyxl
 from webdav3.client import Client
-import jsons
-import json
 
 
 
@@ -143,20 +142,21 @@ def upload_to_webdav(local_file, webdav_url, webdav_path, username, password):
 def save_columns_to_json(selected_columns, filename='columns.json'):
     try:
         with open(filename, 'w') as file:
-            json.dump(selected_columns, file)  # Use json module to save as JSON
+            # Use jsonify to convert the data to JSON and write it to the file
+            json.dump(selected_columns, file)
         print(f"Columns saved to {filename}")
     except Exception as e:
         print(f"Error saving columns to file: {e}")
-        
+
 def load_columns_from_json(filename='columns.json'):
     try:
         with open(filename, 'r') as file:
-            columns = json.load(file)  # Use JSON module to load from JSON
+            # Use jsonify to load the JSON data from the file
+            columns = json.load(file)
         return columns
     except Exception as e:
         print(f"Error loading columns from file: {e}")
         return []
-
 
 def save_columns_to_file(selected_columns_uploaded, selected_columns_entities, filename='columns.txt'):
     try:
