@@ -357,7 +357,7 @@ def download_file():
             file_stream = BytesIO(temp_file.read())
 
         # Provide the BytesIO object for the file to be sent to the user
-        return send_file(file_stream, as_attachment=True, download_name=file_to_download)
+        return send_file(file_stream, as_attachment=True)
 
     except Exception as e:
         print(f"Error downloading file: {e}")
