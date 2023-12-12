@@ -23,7 +23,7 @@ print_files_in_current_folder()
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Change this to a secure secret key
-
+#1
 @app.route('/')
 def default_page():
     return render_template('login.html')
