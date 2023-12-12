@@ -4,6 +4,7 @@ import requests
 from io import BytesIO
 import tempfile
 import asyncio
+import time
 
 
 
@@ -349,15 +350,30 @@ def download_file():
         client = Client(options)
         remote_path = os.path.join(webdav_path, file_to_download).replace("\\", "/")
 
-        # Download the file from WebDAV
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            client.download(remote_path, temp_file.name)
+        # Wait for up to 10 minutes for the file to exist
+        timeout = 600  # 10 minutes in seconds
+        interval = 5  # Sleep interval in seconds
+        start_time = time.time()
 
-            # Create a BytesIO object to stream the file
-            file_stream = BytesIO(temp_file.read())
+        while time.time() - start_time < timeout:
+            # Check if the file exists
+            if client.check(remote_path):
+                # Download the file from WebDAV
+                with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                    client.download(remote_path, temp_file.name)
 
-        # Provide the BytesIO object for the file to be sent to the user
-        return send_file(file_stream, as_attachment=True, attachment_filename=file_to_download)
+                    # Create a BytesIO object to stream the file
+                    file_stream = BytesIO(temp_file.read())
+
+                # Provide the BytesIO object for the file to be sent to the user
+                return send_file(file_stream, as_attachment=True, attachment_filename=file_to_download)
+
+            # Sleep for the specified interval before checking again
+            time.sleep(interval)
+
+        # If the file doesn't exist after the timeout, print an error message
+        print(f"File '{file_to_download}' not found within the specified timeout.")
+        return "Error: File not found within the specified timeout."
 
     except Exception as e:
         print(f"Error downloading file: {e}")
