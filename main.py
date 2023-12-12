@@ -1,5 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 
 import pandas as pd
@@ -218,6 +217,8 @@ def index2():
 
 # ...
 
+# ...
+
 @app.route("/compare/<filename>", methods=["GET", "POST"])
 def compare(filename):
     # Load the selected columns from the JSON file if it exists
@@ -267,6 +268,19 @@ def compare(filename):
         # Update column_names_uploaded
         column_names_uploaded = [selected_column_uploaded]
 
+        # Check if the file exists on WebDAV
+        file_to_download = "search_results.pdf"
+        file_exists = check_file_exists()
+
+        # Redirect to the download page (index5_page) if the file exists
+        if file_exists:
+            print("File found! You are being redirected to the download page.")
+            return redirect(url_for('indexs'))
+
+        # Redirect to index4 if the file does not exist
+        print("File not found. You are being redirected to the search results page.")
+        return redirect(url_for('indexs', file_exists=file_exists))
+
     try:
         # Load the uploaded Excel file for column selection
         df_uploaded = pd.read_excel(os.path.join(app.config["UPLOADED_UPLOADS_DEST"], filename))
@@ -287,7 +301,58 @@ def compare(filename):
 
     return render_template("compare.html", filename=filename, column_names_uploaded=column_names_uploaded, column_names_entities=column_names_entities,
                            selected_column_uploaded=selected_column_uploaded, selected_column_entities=selected_column_entities)
-    
+
+webdav_url = "https://ogi.teracloud.jp/dav/"
+webdav_user = "triniredman"
+webdav_password = "9JRTsQxCoVcgBUh4"
+webdav_path = "Documents/"
+file_to_download = "search_results.pdf"
+documents_path = os.path.expanduser("~/Documents")
+
+def check_file_exists():
+    try:
+        options = {
+            'webdav_hostname': webdav_url,
+            'webdav_login': webdav_user,
+            'webdav_password': webdav_password,
+        }
+
+        client = Client(options)
+        remote_files = client.list(webdav_path)
+        return file_to_download in remote_files
+
+    except Exception as e:
+        print(f"Error checking file existence: {e}")
+        return False
+
+@app.route('/indexs')
+def indexs():
+    file_exists = check_file_exists()
+    return render_template('index4.html', file_exists=file_exists)
+
+@app.route('/download')
+def download_file():
+    try:
+        options = {
+            'webdav_hostname': webdav_url,
+            'webdav_login': webdav_user,
+            'webdav_password': webdav_password,
+        }
+
+        client = Client(options)
+        remote_path = os.path.join(webdav_path, file_to_download).replace("\\", "/")
+        local_path = os.path.join(documents_path, file_to_download)
+
+        # Download the file from WebDAV to the local path
+        client.download_sync(remote_path=remote_path, local_path=local_path)
+
+        # Provide the local path for the file to be sent to the user
+        return send_file(local_path, as_attachment=True)
+
+    except Exception as e:
+        print(f"Error downloading file: {e}")
+        return "Error downloading file"
+
 
 
 if __name__ == '__main__':
