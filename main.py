@@ -316,7 +316,7 @@ webdav_path = "Documents/"
 file_to_download = "search_results.pdf"
 documents_path = os.path.expanduser("~/Documents")
 
-def check_file_exists((timeout_minutes=10):
+def check_file_exists(timeout_minutes=10):
     try:
         options = {
             'webdav_hostname': webdav_url,
