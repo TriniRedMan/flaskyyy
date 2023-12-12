@@ -316,7 +316,7 @@ webdav_path = "Documents/"
 file_to_download = "search_results.pdf"
 documents_path = os.path.expanduser("~/Documents")
 
-def check_file_exists():
+def check_file_exists((timeout_minutes=10):
     try:
         options = {
             'webdav_hostname': webdav_url,
@@ -325,13 +325,27 @@ def check_file_exists():
         }
 
         client = Client(options)
-        remote_files = client.list(webdav_path)
-        return file_to_download in remote_files
+
+        # Calculate the timeout in seconds
+        timeout_seconds = timeout_minutes * 60
+        start_time = time.time()
+
+        while time.time() - start_time < timeout_seconds:
+            # Check if the file exists
+            remote_files = client.list(webdav_path)
+            if file_to_download in remote_files:
+                return True
+
+            # Sleep for a short interval before checking again
+            time.sleep(1)
+
+        # If the file doesn't exist after the timeout, return False
+        return False
 
     except Exception as e:
         print(f"Error checking file existence: {e}")
         return False
-
+        
 @app.route('/indexs')
 def indexs():
     file_exists = check_file_exists()
