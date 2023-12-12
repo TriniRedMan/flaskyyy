@@ -11,17 +11,17 @@
     <p>File: {{ filename }}</p>
 
     <form method="post">
-        <label for="selected_column_uploaded">Select Column (Uploaded File):</label>
-        <select id="selected_column_uploaded" name="selected_column">
-            {% for column in column_names %}
-                <option value="{{ column }}">{{ column }}</option>
+        <!-- For the uploaded file dropdown -->
+        <select id="selected_column" name="selected_column">
+            {% for column in column_names_uploaded %}
+                <option value="{{ column }}" {% if column == selected_column_uploaded %}selected{% endif %}>{{ column }}</option>
             {% endfor %}
         </select>
-
-        <label for="selected_column_entities">Select Column (Entities File):</label>
+        
+        <!-- For the entities file dropdown -->
         <select id="selected_column_entities" name="selected_column_entities">
             {% for column in column_names_entities %}
-                <option value="{{ column }}">{{ column }}</option>
+                <option value="{{ column }}" {% if column == selected_column_entities %}selected{% endif %}>{{ column }}</option>
             {% endfor %}
         </select>
 
