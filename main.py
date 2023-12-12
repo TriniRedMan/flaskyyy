@@ -3,6 +3,7 @@ from flask_uploads import UploadSet, configure_uploads, IMAGES
 import requests
 from io import BytesIO
 import tempfile
+import asyncio
 
 
 
@@ -335,6 +336,7 @@ def indexs():
     file_exists = check_file_exists()
     return render_template('index4.html', file_exists=file_exists)
 
+
 @app.route('/download')
 def download_file():
     try:
@@ -347,22 +349,12 @@ def download_file():
         client = Client(options)
         remote_path = os.path.join(webdav_path, file_to_download).replace("\\", "/")
 
-        # Create a temporary file
+        # Download the file from WebDAV
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            local_path = temp_file.name
+            client.download(remote_path, temp_file.name)
 
-            # Download the file from WebDAV synchronously
-            client.download_sync(remote_path, local_path)
-
-            # Read the content of the temporary file into memory
-            with open(local_path, 'rb') as file:
-                file_content = file.read()
-
-        # Remove the temporary file
-        os.remove(local_path)
-
-        # Create a BytesIO object to stream the file
-        file_stream = BytesIO(file_content)
+            # Create a BytesIO object to stream the file
+            file_stream = BytesIO(temp_file.read())
 
         # Provide the BytesIO object for the file to be sent to the user
         return send_file(file_stream, as_attachment=True, download_name=file_to_download)
