@@ -9,7 +9,7 @@ from webdav3.client import Client
 import jsons
 
 
-
+#1
 def print_files_in_current_folder():
     current_folder = os.getcwd()  # Get the current working directory
     files = [f for f in os.listdir(current_folder) if os.path.isfile(os.path.join(current_folder, f))]
