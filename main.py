@@ -149,21 +149,11 @@ def save_columns_to_json(selected_columns, filename='columns.json'):
 def load_columns_from_json(filename='columns.json'):
     try:
         with open(filename, 'r') as file:
-            columns = json.json.load(file)  # Use JSON module to load from JSON
-        return columns
-    except Exception as e:
-        print(f"Error loading columns from file: {e}")
-        return []
-
-def load_columns_from_json(filename='columns.json'):
-    try:
-        with open(filename, 'r') as file:
             columns = json.load(file)  # Use JSON module to load from JSON
         return columns
     except Exception as e:
         print(f"Error loading columns from file: {e}")
         return []
-    
 
 
 def save_columns_to_file(selected_columns_uploaded, selected_columns_entities, filename='columns.txt'):
