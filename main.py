@@ -9,7 +9,6 @@ from webdav3.client import Client
 import jsons
 
 
-#1
 def print_files_in_current_folder():
     current_folder = os.getcwd()  # Get the current working directory
     files = [f for f in os.listdir(current_folder) if os.path.isfile(os.path.join(current_folder, f))]
@@ -142,10 +141,19 @@ def upload_to_webdav(local_file, webdav_url, webdav_path, username, password):
 def save_columns_to_json(selected_columns, filename='columns.json'):
     try:
         with open(filename, 'w') as file:
-            json.dump(selected_columns, file)  # Use JSON module to save as JSON
+            json.json.dump(selected_columns, file)  # Use JSON module to save as JSON
         print(f"Columns saved to {filename}")
     except Exception as e:
         print(f"Error saving columns to file: {e}")
+
+def load_columns_from_json(filename='columns.json'):
+    try:
+        with open(filename, 'r') as file:
+            columns = json.json.load(file)  # Use JSON module to load from JSON
+        return columns
+    except Exception as e:
+        print(f"Error loading columns from file: {e}")
+        return []
 
 def load_columns_from_json(filename='columns.json'):
     try:
