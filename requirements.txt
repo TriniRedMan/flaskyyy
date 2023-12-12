@@ -10,4 +10,5 @@ pandas
 openpyxl
 webdavclient3
 PyGithub
+import jsons
 
