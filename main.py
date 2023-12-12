@@ -141,11 +141,11 @@ def upload_to_webdav(local_file, webdav_url, webdav_path, username, password):
 def save_columns_to_json(selected_columns, filename='columns.json'):
     try:
         with open(filename, 'w') as file:
-            json.dump(selected_columns, file)  # Use JSON module to save as JSON
+            jsons.dump(selected_columns, file)  # Use jsons module to save as JSON
         print(f"Columns saved to {filename}")
     except Exception as e:
         print(f"Error saving columns to file: {e}")
-
+        
 def load_columns_from_json(filename='columns.json'):
     try:
         with open(filename, 'r') as file:
