@@ -287,6 +287,7 @@ def compare(filename):
 
     return render_template("compare.html", filename=filename, column_names_uploaded=column_names_uploaded, column_names_entities=column_names_entities,
                            selected_column_uploaded=selected_column_uploaded, selected_column_entities=selected_column_entities)
+    
 
 
 if __name__ == '__main__':
