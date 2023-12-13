@@ -128,6 +128,7 @@ def search_name_in_database(name, column, df):
 @app.route('/export_pdf', methods=['POST'])
 def export_pdf():
     search_result_plain_text = request.form.get('search_result_plain_text', '')
+    entered_name = request.form.get('search_text', '')
 
     # You can print or process the plain text content as needed
     print("Search Result Plain Text:")
@@ -142,11 +143,14 @@ def export_pdf():
     # Create a BytesIO buffer to store the PDF
     buffer = BytesIO()
 
-    # Create a ReportLab canvas
-    p = canvas.Canvas(buffer, pagesize=letter)
+    # Create a ReportLab document
+    pdf = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    story = []
 
-    # Set the starting position from the top of the page
-    y_position = 700
+    # Add "Search Results for" and entered name to the PDF
+    title = f"Search Results for {entered_name}"
+    story.append(Paragraph(title, styles['Title']))
 
     # Parse HTML table using BeautifulSoup
     soup = BeautifulSoup(search_result_plain_text, 'html.parser')
@@ -157,20 +161,11 @@ def export_pdf():
         cols = [col.get_text(strip=True) for col in row.find_all(['th', 'td'])]
         text_data += "\n".join(cols) + "\n"
 
-    # Set the font and font size
-    p.setFont("Helvetica", 12)
+    # Add the search results to the PDF
+    story.append(Paragraph(text_data, styles['Normal']))
 
-    # Split the text into lines with a maximum of 75 characters
-    lines = [text_data[i:i+75] for i in range(0, len(text_data), 75)]
-
-    # Draw each line on the canvas
-    for line in lines:
-        p.drawString(10, y_position, line)
-        y_position -= 12  # Adjust the vertical position for the next line
-
-    # Save the PDF to the buffer
-    p.showPage()
-    p.save()
+    # Build the PDF
+    pdf.build(story)
 
     # Move the buffer position to the beginning
     buffer.seek(0)
