@@ -124,8 +124,6 @@ def search_name_in_database(name, column, df):
     return matching_results.to_html(index=False)
 
 @app.route('/export_pdf', methods=['POST'])
-
-@app.route('/export_pdf', methods=['POST'])
 def export_pdf():
     search_result_html = request.form.get('search_result_html', '')
 
@@ -142,13 +140,15 @@ def export_pdf():
     table_html = search_result_html[table_start:table_end]
 
     # Create a table from the extracted HTML
-    table = Table([TableStyle([('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                               ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                               ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                               ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                               ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                               ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                               ('GRID', (0, 0), (-1, -1), 1, colors.black)])])
+    table = Table([['Cell 1', 'Cell 2'], ['Cell 3', 'Cell 4']], style=[
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ])
 
     elements.append(table)
 
