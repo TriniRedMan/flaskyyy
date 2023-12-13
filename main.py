@@ -165,9 +165,9 @@ def export_pdf():
 
     # Add user-entered login and timestamp
     # Get the entered_username from the g object
-    entered_username = g.get('entered_username', '')
+    g.entered_username = get('entered_username', '')
     print("Entered Username (from g):", entered_usernam
-    user_login = entered_username
+    user_login = g.entered_username
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     print("Login :", user_login)
 
