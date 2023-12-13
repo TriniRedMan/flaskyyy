@@ -16,7 +16,7 @@
         
         <label for="selected_column">Select Column:</label>
         <select name="selected_column" required>
-            {% for column in column_names %}
+            {% for column in column_names_entities %}
                 <option value="{{ column }}">{{ column }}</option>
             {% endfor %}
         </select>
