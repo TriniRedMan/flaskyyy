@@ -133,7 +133,7 @@ def export_pdf():
 
     # Debugging: Print entered_name
     print("Entered Name:", entered_name)
-    print("Entered Name:", entered_name2)
+    
 
     # You can print or process the plain text content as needed
     print("Search Result Plain Text:")
@@ -155,9 +155,20 @@ def export_pdf():
 
     # Add "Search Results for" and entered name to the PDF
     title = f"Search Results for {entered_name}"
+
+    # Add user-entered login and timestamp
+    user_login = session.get('user_login', 'Unknown User')
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    print("Login :", user_login)
+
+    user_info = f"User: {user_login}, Timestamp: {timestamp}"
+
+    
+    # Add user info to the PDF
+    story.append(Paragraph(user_info, styles['Normal']))
     story.append(Paragraph(title, styles['Title']))
 
-    # Parse HTML table using BeautifulSoup
+     # Parse HTML table using BeautifulSoup
     soup = BeautifulSoup(search_result_plain_text, 'html.parser')
 
     # Extract text data
