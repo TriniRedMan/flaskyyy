@@ -7,8 +7,7 @@
 </head>
 <body>
     <h1>Name Search</h1>
-
-    <a href="{{ url_for('bulk_upload') }}" class="btn btn-primary">Bulk Upload</a>   
+     
     
     <form action="/search" method="post">
         <label for="search_text">Enter Name:</label>
@@ -44,6 +43,8 @@
     {% if error %}
         <p style="color: red;">{{ error }}</p>
     {% endif %}
+
+    <a href="{{ url_for('bulk_upload') }}" class="btn btn-primary">Bulk Upload</a>  
  
 </body>
 </html>
