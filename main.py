@@ -62,6 +62,11 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        # Get the entered username from the textarea
+        entered_username = request.form.get('username', '')
+        print(entered_username)
+    # Now you can use 'entered_username' in your Flask code as needed
+    print("Entered Username:", entered_username)
         user = authenticate(username, password)
         if user:
             # Store user ID in the session
@@ -157,7 +162,7 @@ def export_pdf():
     title = f"Search Results for {entered_name}"
 
     # Add user-entered login and timestamp
-    user_login = session.get('user_login', 'Unknown User')
+    user_login = entered_username
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     print("Login :", user_login)
 
