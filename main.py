@@ -190,7 +190,6 @@ def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_u
 
         # Create a BytesIO object to simulate a file
         content_stream = BytesIO(content_bytes)
-        content_stream.seek(0)
 
         # Upload the content to the WebDAV server
         options = {
@@ -201,11 +200,16 @@ def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_u
         client = Client(options)
         remote_path = os.path.join(webdav_path, filename).replace("\\", "/")
 
-        # Upload the content to the WebDAV server using upload method
-        client.upload(remote_path=remote_path, local_path=content_stream)
+        # Save BytesIO content to a temporary file before uploading
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file.write(content_stream.read())
 
-        # Close the BytesIO object
-        content_stream.close()
+        # Upload the content to the WebDAV server using upload method
+        client.upload(remote_path=remote_path, local_path=temp_file.name)
+
+        # Close and remove the temporary file
+        temp_file.close()
+        os.remove(temp_file.name)
 
         print(f"Columns saved to {remote_path}")
     except Exception as e:
