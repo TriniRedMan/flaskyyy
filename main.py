@@ -129,13 +129,6 @@ def search_name_in_database(name, column, df):
 def export_pdf():
     search_result_html = request.form.get('search_result_html', '')
 
-    # Create a PDF buffer
-    pdf_buffer = BytesIO()
-
-    # Create a PDF document
-    doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
-    elements = []
-
     # Extract the table from the HTML using BeautifulSoup
     soup = BeautifulSoup(search_result_html, 'html.parser')
     table_data = []
@@ -149,6 +142,23 @@ def export_pdf():
     for row in soup.find_all('tr'):
         row_data = [col.get_text(strip=True) for col in row.find_all(['th', 'td'])]
         table_data.append(row_data)
+
+    # Check if table_data has at least one row and column
+    if not table_data or not table_data[0]:
+        print("No data to export to PDF.")
+        return "No data to export to PDF."
+
+    # Print the extracted data
+    print("Extracted Data:")
+    for row in table_data:
+        print(row)
+
+    # Create a PDF buffer
+    pdf_buffer = BytesIO()
+
+    # Create a PDF document
+    doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+    elements = []
 
     # Create a table from the extracted HTML data
     table = Table(table_data, style=[
