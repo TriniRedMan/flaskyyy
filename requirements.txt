@@ -9,4 +9,4 @@ Flask-Reuploaded
 pandas
 openpyxl
 webdavclient3
-Flask-WeasyPrint
+reportlab
