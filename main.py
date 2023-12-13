@@ -170,7 +170,7 @@ def export_pdf():
     pdf_buffer.seek(0)
 
     # Return the PDF as a response
-    return Response(pdf_buffer.read(), mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=search_result.pdf'}))
+    return Response(pdf_buffer.read(), mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=search_result.pdf'})
     
 
 # Configure file uploads
