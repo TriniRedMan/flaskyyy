@@ -24,8 +24,10 @@
         <button type="submit">Search</button>
     </form>
 
-       {% if search_result %}
+    {% if search_result %}
         <h2>Search Result:</h2>
+        <!-- Include the entered text value in the search result -->
+        <p>Entered Name: {{ request.form['search_text'] }}</p>
         {{ search_result|safe }}
     
         <!-- Add Export button -->
