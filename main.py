@@ -246,6 +246,9 @@ def compare(filename):
     columns_file = 'columns.json'
     columns_file_path = os.path.join(app.config["UPLOADED_UPLOADS_DEST"], columns_file)
     
+    # Load the entities Excel file for column selection
+    entities_file_path = 'entities.xlsx'
+
     if os.path.exists(columns_file_path):
         selected_columns = load_columns_from_json(columns_file_path)
     else:
@@ -313,15 +316,12 @@ def compare(filename):
     # Get the column names for the uploaded file dropdown
     column_names_uploaded = df_uploaded.columns.tolist()
 
-    # Load the entities Excel file for column selection
-    entities_file_path = 'entities.xlsx'
-    df_entities = pd.read_excel(entities_file_path)
-
     # Get the column names for the entities file dropdown
     column_names_entities = df_entities.columns.tolist()
 
     return render_template("compare.html", filename=filename, column_names_uploaded=column_names_uploaded, column_names_entities=column_names_entities,
                            selected_column_uploaded=selected_column_uploaded, selected_column_entities=selected_column_entities)
+
 
 webdav_url = "https://ogi.teracloud.jp/dav/"
 webdav_user = "triniredman"
