@@ -123,35 +123,22 @@ def search_name_in_database(name, column, df):
 
     return matching_results.to_html(index=False)
 
-    return matching_results.to_html(index=False)
-
-def extract_plain_text(soup):
-    paragraphs_and_headings = soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
-    text_content = [tag.get_text(separator='\n', strip=True) for tag in paragraphs_and_headings]
-    
-    # Debug print
-    print("Extracted Text Content:")
-    print(text_content)
-
-    return '\n'.join(text_content)
+    #return matching_results.to_html(index=False)
 
 @app.route('/export_pdf', methods=['POST'])
 def export_pdf():
-    search_result_html = request.form.get('search_result_html', '')
+    search_result_plain_text = request.form.get('search_result_plain_text', '')
 
-    # Parse HTML and extract plain text
-    soup = BeautifulSoup(search_result_html, 'html.parser')
-    plain_text_content = extract_plain_text(soup)
+    # You can print or process the plain text content as needed
+    print("Search Result Plain Text:")
+    print(search_result_plain_text)
 
-    print("Extracted Plain Text:")
-    print(plain_text_content)
-
-    if not plain_text_content.strip():
+    if not search_result_plain_text.strip():
         return "Empty or Invalid Plain Text. Cannot create PDF."
 
     # Create PDF from plain text content
     pdf_filename = 'search_result.pdf'
-    response = make_response(plain_text_content)
+    response = make_response(search_result_plain_text)
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'attachment; filename={pdf_filename}'
     return response
