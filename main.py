@@ -128,6 +128,8 @@ def search_name_in_database(name, column, df):
 @app.route('/export_pdf', methods=['POST'])
 def export_pdf():
     search_result_html = request.form.get('search_result_html', '')
+    print("Search Result HTML:")
+    print(search_result_html)
 
     # Extract the table from the HTML using BeautifulSoup
     soup = BeautifulSoup(search_result_html, 'html.parser')
