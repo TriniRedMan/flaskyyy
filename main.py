@@ -126,8 +126,14 @@ def search_name_in_database(name, column, df):
     return matching_results.to_html(index=False)
 
 def extract_plain_text(soup):
-    # Extract plain text content
-    return '\n'.join([row.get_text(strip=True) for row in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'])])
+    paragraphs_and_headings = soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+    text_content = [tag.get_text(separator='\n', strip=True) for tag in paragraphs_and_headings]
+    
+    # Debug print
+    print("Extracted Text Content:")
+    print(text_content)
+
+    return '\n'.join(text_content)
 
 @app.route('/export_pdf', methods=['POST'])
 def export_pdf():
