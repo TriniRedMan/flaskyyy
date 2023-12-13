@@ -193,13 +193,19 @@ def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_u
         for column in selected_columns_entities:
             content += f"{column}\n"
 
+        # Convert content to bytes
+        content_bytes = content.encode('utf-8')
+
         # Upload the content to the WebDAV server
-        with BytesIO(content.encode()) as content_stream:
-            client.upload(remote_path=remote_path, local_path=content_stream)
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file.write(content_bytes)
+            temp_file.seek(0)
+            client.upload(remote_path=remote_path, local_path=temp_file.name)
 
         print(f"Columns saved to {remote_path}")
     except Exception as e:
         print(f"Error saving columns to file: {e}")
+
 
 
 
