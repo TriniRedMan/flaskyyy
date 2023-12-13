@@ -166,29 +166,40 @@ def load_columns_from_json(filename='columns.json'):
         return []
 
 
-def save_columns_to_file(selected_columns_uploaded, entities_file_path, filename='selected_columns.txt'):
+def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_url, webdav_path, webdav_user, webdav_password, filename='selected_columns.txt'):
     try:
         # Read the entities file to get its column names
         df_entities = pd.read_excel(entities_file_path)
         selected_columns_entities = df_entities.columns.tolist()
 
-        with open(filename, 'w') as file:
-            # Write selected columns from the uploaded file
-            file.write("Uploaded File Columns:\n")
-            for column in selected_columns_uploaded:
-                file.write(f"{column}\n")
+        options = {
+            'webdav_hostname': webdav_url,
+            'webdav_login': webdav_user,
+            'webdav_password': webdav_password,
+        }
 
-            # Add a separator between sections
-            file.write("\nEntities File Columns:\n")
+        client = Client(options)
+        remote_path = os.path.join(webdav_path, filename).replace("\\", "/")
 
-            # Write selected columns from the entities file
-            for column in selected_columns_entities:
-                file.write(f"{column}\n")
+        # Write selected columns from the uploaded file
+        content = "Uploaded File Columns:\n"
+        for column in selected_columns_uploaded:
+            content += f"{column}\n"
 
-        print(f"Columns saved to {filename}")
+        # Add a separator between sections
+        content += "\nEntities File Columns:\n"
+
+        # Write selected columns from the entities file
+        for column in selected_columns_entities:
+            content += f"{column}\n"
+
+        # Upload the content to the WebDAV server
+        client.upload_sync(remote_path=remote_path, content=content)
+
+        print(f"Columns saved to {remote_path}")
     except Exception as e:
         print(f"Error saving columns to file: {e}")
-     
+
 
 @app.route('/bulk_upload')
 def bulk_upload():
