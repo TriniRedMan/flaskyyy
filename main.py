@@ -6,6 +6,9 @@ import tempfile
 import asyncio
 import time
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyl
 
 
 
@@ -120,22 +123,43 @@ def search_name_in_database(name, column, df):
     return matching_results.to_html(index=False)
 
 @app.route('/export_pdf', methods=['POST'])
+
+@app.route('/export_pdf', methods=['POST'])
 def export_pdf():
     search_result_html = request.form.get('search_result_html', '')
 
-    # Generate a PDF using ReportLab
+    # Create a PDF buffer
     pdf_buffer = BytesIO()
-    p = canvas.Canvas(pdf_buffer)
-    p.drawString(100, 800, "Search Result PDF:")
-    p.drawString(100, 750, search_result_html)  # Adjust the position as needed
-    p.showPage()
-    p.save()
+
+    # Create a PDF document
+    doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
+    elements = []
+
+    # Extract the table from the HTML
+    table_start = search_result_html.find("<table")
+    table_end = search_result_html.find("</table>") + len("</table>")
+    table_html = search_result_html[table_start:table_end]
+
+    # Create a table from the extracted HTML
+    table = Table([TableStyle([('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                               ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                               ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                               ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                               ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                               ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                               ('GRID', (0, 0), (-1, -1), 1, colors.black)])])
+
+    elements.append(table)
+
+    # Build the PDF document
+    doc.build(elements)
 
     # Move the buffer's position to the beginning for reading
     pdf_buffer.seek(0)
 
     # Return the PDF as a response
     return Response(pdf_buffer.read(), mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=search_result.pdf'})
+
 
 # Configure file uploads
 uploads = UploadSet("uploads", IMAGES)
