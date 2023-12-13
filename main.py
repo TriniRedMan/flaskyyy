@@ -143,6 +143,13 @@ def export_pdf():
         row_data = [col.get_text(strip=True) for col in row.find_all(['th', 'td'])]
         table_data.append(row_data)
 
+    print("Extracted Table Data:")
+    print(table_data)  # Add this debug print
+
+    if not table_data or len(table_data[0]) == 0:
+        print("Empty or Invalid Table Data. Cannot create PDF.")
+        return "Error: Empty or Invalid Table Data"
+
     # Create a PDF buffer
     pdf_buffer = BytesIO()
 
@@ -171,6 +178,7 @@ def export_pdf():
 
     # Return the PDF as a response
     return Response(pdf_buffer.read(), mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=search_result.pdf'})
+
 
 # Configure file uploads
 uploads = UploadSet("uploads", IMAGES)
