@@ -125,63 +125,30 @@ def search_name_in_database(name, column, df):
 
     return matching_results.to_html(index=False)
 
+def extract_plain_text(soup):
+    # Extract plain text content
+    return '\n'.join([row.get_text(strip=True) for row in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li'])])
+
 @app.route('/export_pdf', methods=['POST'])
 def export_pdf():
     search_result_html = request.form.get('search_result_html', '')
-    search_result_html = request.form.get('search_result_html', '')
-    print("Received HTML for PDF Export:")
-    print(search_result_html)
 
-    # Extract the table from the HTML using BeautifulSoup
+    # Parse HTML and extract plain text
     soup = BeautifulSoup(search_result_html, 'html.parser')
-    table_data = []
+    plain_text_content = extract_plain_text(soup)
 
-    # Extract headers (th elements) if present
-    headers = [header.get_text(strip=True) for header in soup.find_all('th')]
-    if headers:
-        table_data.append(headers)
+    print("Extracted Plain Text:")
+    print(plain_text_content)
 
-    # Extract rows (tr elements)
-    for row in soup.find_all('tr'):
-        row_data = [col.get_text(strip=True) for col in row.find_all(['th', 'td'])]
-        table_data.append(row_data)
+    if not plain_text_content.strip():
+        return "Empty or Invalid Plain Text. Cannot create PDF."
 
-    print("Extracted Table Data:")
-    print(table_data)  # Add this debug print
-
-    if not table_data or len(table_data[0]) == 0:
-        print("Empty or Invalid Table Data. Cannot create PDF.")
-        return "Error: Empty or Invalid Table Data"
-
-    # Create a PDF buffer
-    pdf_buffer = BytesIO()
-
-    # Create a PDF document
-    doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
-    elements = []
-
-    # Create a table from the extracted HTML data
-    table = Table(table_data, style=[
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black),
-    ])
-
-    elements.append(table)
-
-    # Build the PDF document
-    doc.build(elements)
-
-    # Move the buffer's position to the beginning for reading
-    pdf_buffer.seek(0)
-
-    # Return the PDF as a response
-    return Response(pdf_buffer.read(), mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=search_result.pdf'})
-
+    # Create PDF from plain text content
+    pdf_filename = 'search_result.pdf'
+    response = make_response(plain_text_content)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename={pdf_filename}'
+    return response
 
 # Configure file uploads
 uploads = UploadSet("uploads", IMAGES)
