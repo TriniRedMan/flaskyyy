@@ -128,7 +128,7 @@ def search_name_in_database(name, column, df):
 @app.route('/export_pdf', methods=['POST'])
 def export_pdf():
     search_result_plain_text = request.form.get('search_result_plain_text', '')
-    entered_name = request.form.get('search_text', '')
+    entered_name = request.form.get('search_text', '')  # Use 'search_text' here
 
     # You can print or process the plain text content as needed
     print("Search Result Plain Text:")
@@ -176,6 +176,7 @@ def export_pdf():
     response.headers['Content-Disposition'] = f'attachment; filename={pdf_filename}'
 
     return response
+
 
 # Configure file uploads
 uploads = UploadSet("uploads", IMAGES)
