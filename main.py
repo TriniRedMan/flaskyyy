@@ -180,6 +180,7 @@ def save_columns_to_file(selected_columns_uploaded, selected_columns_entities, f
             # Write selected columns from the entities file
             for column in selected_columns_entities:
                 file.write(f"{column}\n")
+                print(f"{column}\n")
 
         print(f"Columns saved to {filename}")
     except Exception as e:
