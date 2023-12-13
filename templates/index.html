@@ -12,7 +12,8 @@
     
     <form action="/search" method="post">
         <label for="search_text">Enter Name:</label>
-        <input type="text" name="search_text" required>
+        <!-- Change input to textarea -->
+        <textarea name="search_text" required></textarea>
         
         <label for="selected_column">Select Column:</label>
         <select name="selected_column" required>
@@ -32,7 +33,10 @@
     
         <!-- Add Export button -->
         <form action="{{ url_for('export_pdf') }}" method="post">
+            <!-- Use the textarea for entered_name -->
             <textarea name="search_result_plain_text" style="display: none;">{{ search_result|safe }}</textarea>
+            <!-- Set the value of entered_name to the textarea content -->
+            <textarea name="search_text" style="display: none;">{{ request.form['search_text'] }}</textarea>
             <button type="submit">Export to PDF</button>
         </form>
     {% endif %}
