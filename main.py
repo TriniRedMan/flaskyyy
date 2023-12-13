@@ -167,7 +167,7 @@ def load_columns_from_json(filename='columns.json'):
 
 
 
-def save_columns_to_file(selected_columns_uploaded, entities_file_path, filename='selected_columns.txt'):
+def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_url, webdav_path, webdav_user, webdav_password, filename='selected_columns.txt'):
     try:
         # Read the entities file to get its column names
         df_entities = pd.read_excel(entities_file_path)
@@ -203,6 +203,7 @@ def save_columns_to_file(selected_columns_uploaded, entities_file_path, filename
         return response
     except Exception as e:
         print(f"Error saving columns to file: {e}")
+
 
 
 @app.route('/bulk_upload')
