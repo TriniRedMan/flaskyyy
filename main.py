@@ -10,6 +10,8 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table
 from reportlab.lib.styles import getSampleStyleSheet
+from bs4 import BeautifulSoup
+
 
 
 
@@ -134,13 +136,15 @@ def export_pdf():
     doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
     elements = []
 
-    # Extract the table from the HTML
-    table_start = search_result_html.find("<table")
-    table_end = search_result_html.find("</table>") + len("</table>")
-    table_html = search_result_html[table_start:table_end]
+    # Extract the table from the HTML using BeautifulSoup
+    soup = BeautifulSoup(search_result_html, 'html.parser')
+    table_data = []
+    for row in soup.find_all('tr'):
+        row_data = [col.get_text(strip=True) for col in row.find_all(['th', 'td'])]
+        table_data.append(row_data)
 
-    # Create a table from the extracted HTML
-    table = Table([['Cell 1', 'Cell 2'], ['Cell 3', 'Cell 4']], style=[
+    # Create a table from the extracted HTML data
+    table = Table(table_data, style=[
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
@@ -160,7 +164,7 @@ def export_pdf():
 
     # Return the PDF as a response
     return Response(pdf_buffer.read(), mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=search_result.pdf'})
-
+    
 
 # Configure file uploads
 uploads = UploadSet("uploads", IMAGES)
