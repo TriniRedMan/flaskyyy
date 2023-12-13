@@ -172,7 +172,7 @@ def save_columns_to_file(selected_columns_uploaded, selected_columns_entities, f
             # Write selected columns from the uploaded file
             #file.write("Uploaded File Columns:\n")
             for column in selected_columns_uploaded:
-                file.write(f"{column}")
+                file.write(f"{column}\n")
 
             # Add a separator between sections
             #file.write("\nEntities File Columns:\n")
