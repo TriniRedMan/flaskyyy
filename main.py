@@ -23,7 +23,8 @@ import openpyxl
 from webdav3.client import Client
 import json
 
-
+# Define a global variable to store entered_username
+entered_username_global = None
 
 def print_files_in_current_folder():
     current_folder = os.getcwd()  # Get the current working directory
@@ -69,6 +70,8 @@ def login():
          # Set the entered_username in the session
         session['entered_username'] = entered_username
         print(entered_username)
+        # Set the global variable
+        entered_username_global = entered_username
         # Now you can use 'entered_username' in your Flask code as needed
         print("Entered Username:", g.entered_username)
         user = authenticate(username, password)
@@ -167,7 +170,7 @@ def export_pdf():
 
     # Add user-entered login and timestamp
     # Get the entered_username from the g object
-    user_login = session.get('entered_username', '')
+    user_login = entered_username_global if entered_username_global is not None else ''
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     print("Login :", user_login)
 
