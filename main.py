@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file, Response, stream_with_context, make_response
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file, Response, stream_with_context, make_response, g
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 import requests
 from io import BytesIO
@@ -68,7 +68,7 @@ def login():
         g.entered_username = entered_username
         print(entered_username)
         # Now you can use 'entered_username' in your Flask code as needed
-        print("Entered Username:", entered_username)
+        print("Entered Username:", g.entered_username)
         user = authenticate(username, password)
         if user:
             # Store user ID in the session
