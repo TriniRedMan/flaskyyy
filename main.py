@@ -98,13 +98,13 @@ def search():
 
     if not search_text or not selected_column:
         return render_template('index.html', column_names_entities=column_names_entities)
-        #return render_template('index.html', column_names=column_names, error="Please enter a name and select a column.")
 
-    search_result = search_name_in_database(search_text, selected_column)
+    # Pass the DataFrame to the search_name_in_database function
+    search_result = search_name_in_database(search_text, selected_column, df_entities)
+
     return render_template('index.html', column_names_entities=column_names_entities, search_result=search_result)
-    #return render_template('index.html', column_names=column_names, search_result=search_result)
 
-def search_name_in_database(name, column):
+def search_name_in_database(name, column, df):
     search_name_normalized = re.sub(r'\s+', ' ', name.strip()).lower()
 
     if column not in df.columns:
@@ -112,6 +112,8 @@ def search_name_in_database(name, column):
 
     column_data = df[column].fillna('').str.lower()
     matching_results = df[column_data.str.contains(search_name_normalized)]
+
+    return matching_results.to_html(index=False)
 
     return matching_results.to_html(index=False)
 
