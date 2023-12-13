@@ -166,8 +166,12 @@ def load_columns_from_json(filename='columns.json'):
         return []
 
 
-def save_columns_to_file(selected_columns_uploaded, selected_columns_entities, filename='selected_columns.txt'):
+def save_columns_to_file(selected_columns_uploaded, entities_file_path, filename='selected_columns.txt'):
     try:
+        # Read the entities file to get its column names
+        df_entities = pd.read_excel(entities_file_path)
+        selected_columns_entities = df_entities.columns.tolist()
+
         with open(filename, 'w') as file:
             # Write selected columns from the uploaded file
             file.write("Uploaded File Columns:\n")
@@ -180,7 +184,6 @@ def save_columns_to_file(selected_columns_uploaded, selected_columns_entities, f
             # Write selected columns from the entities file
             for column in selected_columns_entities:
                 file.write(f"{column}\n")
-                print(f"{column}\n")
 
         print(f"Columns saved to {filename}")
     except Exception as e:
