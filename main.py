@@ -167,6 +167,8 @@ def load_columns_from_json(filename='columns.json'):
 
 
 
+from flask import after_this_request
+
 def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_url, webdav_path, webdav_user, webdav_password, filename='selected_columns.txt'):
     try:
         # Read the entities file to get its column names
@@ -185,24 +187,40 @@ def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_u
         for column in selected_columns_entities:
             content += f"{column}\n"
 
-        # Convert content to bytes
-        content_bytes = content.encode('utf-8')
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_file.write(content.encode('utf-8'))
 
-        # Create a BytesIO object to simulate a file
-        content_stream = BytesIO(content_bytes)
+            # Upload the content to the WebDAV server
+            options = {
+                'webdav_hostname': webdav_url,
+                'webdav_login': webdav_user,
+                'webdav_password': webdav_password,
+            }
 
-        # Create a Flask response with the file content
-        response = make_response(content_stream.getvalue())
+            client = Client(options)
+            remote_path = os.path.join(webdav_path, filename).replace("\\", "/")
 
-        # Set the appropriate content type and headers for download
-        response.headers['Content-Type'] = 'text/plain'
-        response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+            # Upload the content to the WebDAV server
+            client.upload(remote_path=remote_path, local_path=temp_file.name)
 
-        print(f"Columns saved to browser cache")
+            print(f"Columns saved to {remote_path}")
 
-        return response
+            # Delete the temporary file after the response is sent
+            @after_this_request
+            def remove_file(response):
+                try:
+                    os.remove(temp_file.name)
+                except Exception as error:
+                    print(f"Error removing temporary file: {error}")
+                return response
+
+            return "Columns saved successfully."
+
     except Exception as e:
         print(f"Error saving columns to file: {e}")
+        return "Error saving columns to file."
+
 
 
 
