@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file, Response, stream_with_context, make_response
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file, Response, stream_with_context
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 import requests
 from io import BytesIO
@@ -166,63 +166,26 @@ def load_columns_from_json(filename='columns.json'):
         return []
 
 
-
-from flask import after_this_request
-
-def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_url, webdav_path, webdav_user, webdav_password, filename='selected_columns.txt'):
+def save_columns_to_file(selected_columns_uploaded, selected_columns_entities, filename='columns.txt'):
     try:
-        # Read the entities file to get its column names
-        df_entities = pd.read_excel(entities_file_path)
-        selected_columns_entities = df_entities.columns.tolist()
+        with open(filename, 'w') as file:
+            # Write selected columns from the uploaded file
+            #file.write("Uploaded File Columns:\n")
+            for column in selected_columns_uploaded:
+                file.write(f"{column}")
 
-        # Write selected columns from the uploaded file
-        content = "Uploaded File Columns:\n"
-        for column in selected_columns_uploaded:
-            content += f"{column}\n"
+            # Add a separator between sections
+            #file.write("\nEntities File Columns:\n")
 
-        # Add a separator between sections
-        content += "\nEntities File Columns:\n"
+            # Write selected columns from the entities file
+            for column in selected_columns_entities:
+                file.write(f"{column}\n")
+                #file.write(f"{column}\n")
 
-        # Write selected columns from the entities file
-        for column in selected_columns_entities:
-            content += f"{column}\n"
-
-        # Create a temporary file
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_file.write(content.encode('utf-8'))
-
-            # Upload the content to the WebDAV server
-            options = {
-                'webdav_hostname': webdav_url,
-                'webdav_login': webdav_user,
-                'webdav_password': webdav_password,
-            }
-
-            client = Client(options)
-            remote_path = os.path.join(webdav_path, filename).replace("\\", "/")
-
-            # Upload the content to the WebDAV server
-            client.upload(remote_path=remote_path, local_path=temp_file.name)
-
-            print(f"Columns saved to {remote_path}")
-
-            # Delete the temporary file after the response is sent
-            @after_this_request
-            def remove_file(response):
-                try:
-                    os.remove(temp_file.name)
-                except Exception as error:
-                    print(f"Error removing temporary file: {error}")
-                return response
-
-            return "Columns saved successfully."
-
+        print(f"Columns saved to {filename}")
     except Exception as e:
         print(f"Error saving columns to file: {e}")
-        return "Error saving columns to file."
-
-
-
+     
 
 @app.route('/bulk_upload')
 def bulk_upload():
@@ -269,9 +232,6 @@ def compare(filename):
     columns_file = 'columns.json'
     columns_file_path = os.path.join(app.config["UPLOADED_UPLOADS_DEST"], columns_file)
     
-    # Load the entities Excel file for column selection
-    entities_file_path = 'entities.xlsx'
-
     if os.path.exists(columns_file_path):
         selected_columns = load_columns_from_json(columns_file_path)
     else:
@@ -309,7 +269,7 @@ def compare(filename):
         upload_to_webdav(columns_file, webdav_url, webdav_path, webdav_user, webdav_password)
 
         # Upload the selected columns to WebDAV
-        save_columns_to_file([selected_column_uploaded], entities_file_path, webdav_url, webdav_path, webdav_user, webdav_password)
+        save_columns_to_file([selected_column_uploaded], [selected_column_entities])
         upload_to_webdav('selected_columns.txt', webdav_url, webdav_path, webdav_user, webdav_password)
 
         # Update column_names_uploaded
@@ -339,12 +299,15 @@ def compare(filename):
     # Get the column names for the uploaded file dropdown
     column_names_uploaded = df_uploaded.columns.tolist()
 
+    # Load the entities Excel file for column selection
+    entities_file_path = 'entities.xlsx'
+    df_entities = pd.read_excel(entities_file_path)
+
     # Get the column names for the entities file dropdown
     column_names_entities = df_entities.columns.tolist()
 
     return render_template("compare.html", filename=filename, column_names_uploaded=column_names_uploaded, column_names_entities=column_names_entities,
                            selected_column_uploaded=selected_column_uploaded, selected_column_entities=selected_column_entities)
-
 
 webdav_url = "https://ogi.teracloud.jp/dav/"
 webdav_user = "triniredman"
@@ -353,7 +316,7 @@ webdav_path = "Documents/"
 file_to_download = "search_results.pdf"
 documents_path = os.path.expanduser("~/Documents")
 
-def check_file_exists(timeout_minutes=10):
+def check_file_exists():
     try:
         options = {
             'webdav_hostname': webdav_url,
@@ -362,27 +325,13 @@ def check_file_exists(timeout_minutes=10):
         }
 
         client = Client(options)
-
-        # Calculate the timeout in seconds
-        timeout_seconds = timeout_minutes * 60
-        start_time = time.time()
-
-        while time.time() - start_time < timeout_seconds:
-            # Check if the file exists
-            remote_files = client.list(webdav_path)
-            if file_to_download in remote_files:
-                return True
-
-            # Sleep for a short interval before checking again
-            time.sleep(1)
-
-        # If the file doesn't exist after the timeout, return False
-        return False
+        remote_files = client.list(webdav_path)
+        return file_to_download in remote_files
 
     except Exception as e:
         print(f"Error checking file existence: {e}")
         return False
-        
+
 @app.route('/indexs')
 def indexs():
     file_exists = check_file_exists()
@@ -401,30 +350,15 @@ def download_file():
         client = Client(options)
         remote_path = os.path.join(webdav_path, file_to_download).replace("\\", "/")
 
-        # Wait for up to 10 minutes for the file to exist
-        timeout = 600  # 10 minutes in seconds
-        interval = 5  # Sleep interval in seconds
-        start_time = time.time()
+        # Download the file from WebDAV
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            client.download(remote_path, temp_file.name)
 
-        while time.time() - start_time < timeout:
-            # Check if the file exists
-            if client.check(remote_path):
-                # Download the file from WebDAV
-                with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-                    client.download(remote_path, temp_file.name)
+            # Create a BytesIO object to stream the file
+            file_stream = BytesIO(temp_file.read())
 
-                    # Create a BytesIO object to stream the file
-                    file_stream = BytesIO(temp_file.read())
-
-                # Provide the BytesIO object for the file to be sent to the user
-                return send_file(file_stream, as_attachment=True, attachment_filename=file_to_download)
-
-            # Sleep for the specified interval before checking again
-            time.sleep(interval)
-
-        # If the file doesn't exist after the timeout, print an error message
-        print(f"File '{file_to_download}' not found within the specified timeout.")
-        return "Error: File not found within the specified timeout."
+        # Provide the BytesIO object for the file to be sent to the user
+        return send_file(file_stream, as_attachment=True, attachment_filename=file_to_download)
 
     except Exception as e:
         print(f"Error downloading file: {e}")
