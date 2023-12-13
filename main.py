@@ -97,11 +97,12 @@ def search():
     selected_column = request.form['selected_column']
 
     if not search_text or not selected_column:
-        return render_template('index.html', column_names=column_names, error="Please enter a name and select a column.")
+        return render_template('index.html', column_names_entities=column_names_entities)
+        #return render_template('index.html', column_names=column_names, error="Please enter a name and select a column.")
 
     search_result = search_name_in_database(search_text, selected_column)
-
-    return render_template('index.html', column_names=column_names, search_result=search_result)
+    return render_template('index.html', column_names_entities=column_names_entities, search_result=search_result)
+    #return render_template('index.html', column_names=column_names, search_result=search_result)
 
 def search_name_in_database(name, column):
     search_name_normalized = re.sub(r'\s+', ' ', name.strip()).lower()
