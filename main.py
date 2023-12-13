@@ -5,7 +5,7 @@ from io import BytesIO
 import tempfile
 import asyncio
 import time
-from flask_weasyprint import HTML, render_pdf
+
 
 
 
@@ -118,19 +118,20 @@ def search_name_in_database(name, column, df):
 
     return matching_results.to_html(index=False)
 
-@app.route('/export_pdf', methods=['POST'])
-def export_pdf():
-    # Get the HTML content from the form submission
-    search_result_html = request.form.get('search_result_html', '')
+@app.route('/generate_pdf')
+def generate_pdf():
+    # Generate a PDF using reportlab
+    pdf_buffer = BytesIO()
+    p = canvas.Canvas(pdf_buffer)
+    p.drawString(100, 100, "Hello, this is a PDF generated with ReportLab.")
+    p.showPage()
+    p.save()
 
-    # Generate PDF using Flask-WeasyPrint
-    pdf = render_pdf(HTML(string=search_result_html))
+    # Move the buffer's position to the beginning for reading
+    pdf_buffer.seek(0)
 
-    # Set up a response with the PDF content
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = 'attachment; filename=search_results.pdf'
-
+    # Return the PDF as a response
+    return Response(pdf_buffer.read(), mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=myfile.pdf'})
     return response
 
 # Configure file uploads
