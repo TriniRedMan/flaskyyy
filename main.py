@@ -283,7 +283,7 @@ def compare(filename):
         upload_to_webdav(columns_file, webdav_url, webdav_path, webdav_user, webdav_password)
 
         # Upload the selected columns to WebDAV
-        save_columns_to_file([selected_column_uploaded], 'selected_columns.txt')
+        save_columns_to_file([selected_column_uploaded], entities_file_path, webdav_url, webdav_path, webdav_user, webdav_password)
         upload_to_webdav('selected_columns.txt', webdav_url, webdav_path, webdav_user, webdav_password)
 
         # Update column_names_uploaded
