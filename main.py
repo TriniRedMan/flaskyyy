@@ -201,8 +201,8 @@ def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_u
         client = Client(options)
         remote_path = os.path.join(webdav_path, filename).replace("\\", "/")
 
-        # Upload the content to the WebDAV server
-        client.upload_sync(remote_path=remote_path, content=content_stream.read())
+        # Upload the content to the WebDAV server using upload method
+        client.upload(remote_path=remote_path, local_path=content_stream)
 
         # Close the BytesIO object
         content_stream.close()
