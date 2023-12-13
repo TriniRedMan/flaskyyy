@@ -166,7 +166,7 @@ def load_columns_from_json(filename='columns.json'):
         return []
 
 
-def save_columns_to_file(selected_columns_uploaded, selected_columns_entities, filename='columns.txt'):
+def save_columns_to_file(selected_columns_uploaded, selected_columns_entities, filename='selected_columns.txt'):
     try:
         with open(filename, 'w') as file:
             # Write selected columns from the uploaded file
