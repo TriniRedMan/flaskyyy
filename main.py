@@ -139,6 +139,13 @@ def export_pdf():
     # Extract the table from the HTML using BeautifulSoup
     soup = BeautifulSoup(search_result_html, 'html.parser')
     table_data = []
+
+    # Extract headers (th elements) if present
+    headers = [header.get_text(strip=True) for header in soup.find_all('th')]
+    if headers:
+        table_data.append(headers)
+
+    # Extract rows (tr elements)
     for row in soup.find_all('tr'):
         row_data = [col.get_text(strip=True) for col in row.find_all(['th', 'td'])]
         table_data.append(row_data)
@@ -163,7 +170,7 @@ def export_pdf():
     pdf_buffer.seek(0)
 
     # Return the PDF as a response
-    return Response(pdf_buffer.read(), mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=search_result.pdf'})
+    return Response(pdf_buffer.read(), mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=search_result.pdf'}))
     
 
 # Configure file uploads
