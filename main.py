@@ -138,10 +138,41 @@ def export_pdf():
 
     # Create PDF from plain text content
     pdf_filename = 'search_result.pdf'
-    response = make_response(search_result_plain_text)
+
+    # Create a BytesIO buffer to store the PDF
+    buffer = BytesIO()
+
+    # Create a ReportLab canvas
+    p = canvas.Canvas(buffer, pagesize=letter)
+
+    # Parse HTML table using BeautifulSoup
+    soup = BeautifulSoup(search_result_plain_text, 'html.parser')
+
+    # Extract table data
+    table_data = []
+    for row in soup.find_all('tr'):
+        cols = [col.get_text(strip=True) for col in row.find_all(['th', 'td'])]
+        table_data.append(cols)
+
+    # Create a ReportLab table and add it to the canvas
+    table = Table(table_data)
+    table.wrapOn(p, 200, 400)
+    table.drawOn(p, 10, 300)
+
+    # Save the PDF to the buffer
+    p.showPage()
+    p.save()
+
+    # Move the buffer position to the beginning
+    buffer.seek(0)
+
+    # Create a Flask response with the PDF
+    response = make_response(buffer.read())
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = f'attachment; filename={pdf_filename}'
+
     return response
+
 
 # Configure file uploads
 uploads = UploadSet("uploads", IMAGES)
