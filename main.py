@@ -172,15 +172,6 @@ def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_u
         df_entities = pd.read_excel(entities_file_path)
         selected_columns_entities = df_entities.columns.tolist()
 
-        options = {
-            'webdav_hostname': webdav_url,
-            'webdav_login': webdav_user,
-            'webdav_password': webdav_password,
-        }
-
-        client = Client(options)
-        remote_path = os.path.join(webdav_path, filename).replace("\\", "/")
-
         # Write selected columns from the uploaded file
         content = "Uploaded File Columns:\n"
         for column in selected_columns_uploaded:
@@ -200,6 +191,17 @@ def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_u
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(content_bytes)
             temp_file.seek(0)
+
+            options = {
+                'webdav_hostname': webdav_url,
+                'webdav_login': webdav_user,
+                'webdav_password': webdav_password,
+            }
+
+            client = Client(options)
+            remote_path = os.path.join(webdav_path, filename).replace("\\", "/")
+
+            # Upload the content to the WebDAV server
             client.upload(remote_path=remote_path, local_path=temp_file.name)
 
         print(f"Columns saved to {remote_path}")
