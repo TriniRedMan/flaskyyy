@@ -64,6 +64,8 @@ def login():
         password = request.form['password']
         # Get the entered username from the textarea
         entered_username = request.form.get('username', '')
+        # Set the entered_username in the g object
+        g.entered_username = entered_username
         print(entered_username)
         # Now you can use 'entered_username' in your Flask code as needed
         print("Entered Username:", entered_username)
@@ -162,6 +164,9 @@ def export_pdf():
     title = f"Search Results for {entered_name}"
 
     # Add user-entered login and timestamp
+    # Get the entered_username from the g object
+    entered_username = g.get('entered_username', '')
+    print("Entered Username (from g):", entered_usernam
     user_login = entered_username
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     print("Login :", user_login)
