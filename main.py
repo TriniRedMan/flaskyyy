@@ -65,8 +65,8 @@ def login():
         # Get the entered username from the textarea
         entered_username = request.form.get('username', '')
         print(entered_username)
-    # Now you can use 'entered_username' in your Flask code as needed
-    print("Entered Username:", entered_username)
+        # Now you can use 'entered_username' in your Flask code as needed
+        print("Entered Username:", entered_username)
         user = authenticate(username, password)
         if user:
             # Store user ID in the session
