@@ -129,6 +129,11 @@ def search_name_in_database(name, column, df):
 def export_pdf():
     search_result_plain_text = request.form.get('search_result_plain_text', '')
     entered_name = request.form.get('search_text', '')  # Use 'search_text' here
+    entered_name2 = request.form.get('search_text', '')  # Use 'search_text' here
+
+    # Debugging: Print entered_name
+    print("Entered Name:", entered_name)
+    print("Entered Name:", entered_name2)
 
     # You can print or process the plain text content as needed
     print("Search Result Plain Text:")
