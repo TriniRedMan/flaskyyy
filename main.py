@@ -202,6 +202,9 @@ def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_u
             client = Client(options)
             remote_path = os.path.join(webdav_path, filename).replace("\\", "/")
 
+            # Close the temporary file before uploading
+            temp_file.close()
+
             # Upload the content to the WebDAV server
             client.upload(remote_path=remote_path, local_path=temp_file.name)
 
@@ -211,6 +214,7 @@ def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_u
         print(f"Columns saved to {remote_path}")
     except Exception as e:
         print(f"Error saving columns to file: {e}")
+
 
 
 
