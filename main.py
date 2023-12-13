@@ -146,7 +146,7 @@ def export_pdf():
     p = canvas.Canvas(buffer, pagesize=letter)
 
     # Set the starting position from the top of the page
-    y_position = 800
+    y_position = 400
 
     # Parse HTML table using BeautifulSoup
     soup = BeautifulSoup(search_result_plain_text, 'html.parser')
@@ -160,8 +160,8 @@ def export_pdf():
     # Set the font and font size
     p.setFont("Helvetica", 12)
 
-    # Split the text into lines with a maximum of 50 characters
-    lines = [text_data[i:i+50] for i in range(0, len(text_data), 50)]
+    # Split the text into lines with a maximum of 100 characters
+    lines = [text_data[i:i+100] for i in range(0, len(text_data), 100)]
 
     # Draw each line on the canvas
     for line in lines:
