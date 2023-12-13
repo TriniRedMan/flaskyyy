@@ -167,7 +167,7 @@ def load_columns_from_json(filename='columns.json'):
 
 
 
-def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_url, webdav_path, webdav_user, webdav_password, filename='selected_columns.txt'):
+def save_columns_to_file(selected_columns_uploaded, entities_file_path, filename='selected_columns.txt'):
     try:
         # Read the entities file to get its column names
         df_entities = pd.read_excel(entities_file_path)
@@ -191,30 +191,18 @@ def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_u
         # Create a BytesIO object to simulate a file
         content_stream = BytesIO(content_bytes)
 
-        # Upload the content to the WebDAV server
-        options = {
-            'webdav_hostname': webdav_url,
-            'webdav_login': webdav_user,
-            'webdav_password': webdav_password,
-        }
-        client = Client(options)
-        remote_path = os.path.join(webdav_path, filename).replace("\\", "/")
+        # Create a Flask response with the file content
+        response = make_response(content_stream.getvalue())
 
-        # Save BytesIO content to a temporary file before uploading
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            temp_file.write(content_stream.read())
+        # Set the appropriate content type and headers for download
+        response.headers['Content-Type'] = 'text/plain'
+        response.headers['Content-Disposition'] = f'attachment; filename={filename}'
 
-        # Upload the content to the WebDAV server using upload method
-        client.upload(remote_path=remote_path, local_path=temp_file.name)
+        print(f"Columns saved to browser cache")
 
-        # Close and remove the temporary file
-        temp_file.close()
-        os.remove(temp_file.name)
-
-        print(f"Columns saved to {remote_path}")
+        return response
     except Exception as e:
         print(f"Error saving columns to file: {e}")
-
 
 
 @app.route('/bulk_upload')
