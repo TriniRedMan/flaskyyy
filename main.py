@@ -5,6 +5,7 @@ from io import BytesIO
 import tempfile
 import asyncio
 import time
+from reportlab.pdfgen import canvas
 
 
 
@@ -118,12 +119,15 @@ def search_name_in_database(name, column, df):
 
     return matching_results.to_html(index=False)
 
-@app.route('/generate_pdf')
-def generate_pdf():
-    # Generate a PDF using reportlab
+@app.route('/export_pdf', methods=['POST'])
+def export_pdf():
+    search_result_html = request.form.get('search_result_html', '')
+
+    # Generate a PDF using ReportLab
     pdf_buffer = BytesIO()
     p = canvas.Canvas(pdf_buffer)
-    p.drawString(100, 100, "Hello, this is a PDF generated with ReportLab.")
+    p.drawString(100, 800, "Search Result PDF:")
+    p.drawString(100, 750, search_result_html)  # Adjust the position as needed
     p.showPage()
     p.save()
 
@@ -131,8 +135,7 @@ def generate_pdf():
     pdf_buffer.seek(0)
 
     # Return the PDF as a response
-    return Response(pdf_buffer.read(), mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=myfile.pdf'})
-    return response
+    return Response(pdf_buffer.read(), mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=search_result.pdf'})
 
 # Configure file uploads
 uploads = UploadSet("uploads", IMAGES)
