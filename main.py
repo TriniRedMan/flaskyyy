@@ -128,8 +128,6 @@ def search_name_in_database(name, column, df):
 @app.route('/export_pdf', methods=['POST'])
 def export_pdf():
     search_result_html = request.form.get('search_result_html', '')
-    print("Search Result HTML:")
-    print(search_result_html)
 
     # Extract the table from the HTML using BeautifulSoup
     soup = BeautifulSoup(search_result_html, 'html.parser')
@@ -144,16 +142,6 @@ def export_pdf():
     for row in soup.find_all('tr'):
         row_data = [col.get_text(strip=True) for col in row.find_all(['th', 'td'])]
         table_data.append(row_data)
-
-    # Check if table_data has at least one row and column
-    if not table_data or not table_data[0]:
-        print("No data to export to PDF.")
-        return "No data to export to PDF."
-
-    # Print the extracted data
-    print("Extracted Data:")
-    for row in table_data:
-        print(row)
 
     # Create a PDF buffer
     pdf_buffer = BytesIO()
@@ -183,7 +171,6 @@ def export_pdf():
 
     # Return the PDF as a response
     return Response(pdf_buffer.read(), mimetype='application/pdf', headers={'Content-Disposition': 'attachment;filename=search_result.pdf'})
-    
 
 # Configure file uploads
 uploads = UploadSet("uploads", IMAGES)
