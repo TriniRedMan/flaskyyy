@@ -27,6 +27,12 @@
     {% if search_result %}
         <h2>Search Result:</h2>
         {{ search_result|safe }}
+        
+        <!-- Add Export button -->
+        <form action="{{ url_for('export_pdf') }}" method="post">
+            <input type="hidden" name="search_result_html" value="{{ search_result|safe }}">
+            <button type="submit">Export to PDF</button>
+        </form>
     {% endif %}
 
     {% if error %}
