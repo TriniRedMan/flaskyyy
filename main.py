@@ -66,6 +66,8 @@ def login():
         entered_username = request.form.get('username', '')
         # Set the entered_username in the g object
         g.entered_username = entered_username
+         # Set the entered_username in the session
+        session['entered_username'] = entered_username
         print(entered_username)
         # Now you can use 'entered_username' in your Flask code as needed
         print("Entered Username:", g.entered_username)
@@ -165,9 +167,7 @@ def export_pdf():
 
     # Add user-entered login and timestamp
     # Get the entered_username from the g object
-    #g.entered_username = get('entered_username', '')
-    #print("Entered Username (from g):", entered_usernam
-    user_login = g.entered_username if hasattr(g, 'entered_username') else ''
+    user_login = session.get('entered_username', '')
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     print("Login :", user_login)
 
