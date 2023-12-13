@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file, Response, stream_with_context
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file, Response, stream_with_context, make_respons
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 import requests
 from io import BytesIO
