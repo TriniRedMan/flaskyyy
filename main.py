@@ -166,6 +166,7 @@ def load_columns_from_json(filename='columns.json'):
         return []
 
 
+
 def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_url, webdav_path, webdav_user, webdav_password, filename='selected_columns.txt'):
     try:
         # Read the entities file to get its column names
@@ -187,27 +188,29 @@ def save_columns_to_file(selected_columns_uploaded, entities_file_path, webdav_u
         # Convert content to bytes
         content_bytes = content.encode('utf-8')
 
-        # Upload the content to the WebDAV server
+        # Create a temporary file
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             temp_file.write(content_bytes)
             temp_file.seek(0)
 
+            # Upload the content to the WebDAV server
             options = {
                 'webdav_hostname': webdav_url,
                 'webdav_login': webdav_user,
                 'webdav_password': webdav_password,
             }
-
             client = Client(options)
             remote_path = os.path.join(webdav_path, filename).replace("\\", "/")
 
             # Upload the content to the WebDAV server
             client.upload(remote_path=remote_path, local_path=temp_file.name)
 
+        # Delete the temporary file
+        os.remove(temp_file.name)
+
         print(f"Columns saved to {remote_path}")
     except Exception as e:
         print(f"Error saving columns to file: {e}")
-
 
 
 
