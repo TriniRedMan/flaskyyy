@@ -38,7 +38,10 @@
             <button type="submit">Export to PDF</button>
         </form>
     {% else %}
+        <h2>Search Result:</h2>
         <h2>No results found</h2>
+        <!-- Include the entered text value even if no results found -->
+        <p>Entered Name: {{ request.form['search_text'] }}</p>
     {% endif %}
 
     {% if error %}
