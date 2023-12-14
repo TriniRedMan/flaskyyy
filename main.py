@@ -60,6 +60,7 @@ def authenticate(username, password):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    global entered_username_global  # Declare the global variable
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
