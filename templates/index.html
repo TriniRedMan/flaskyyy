@@ -38,10 +38,14 @@
             <button type="submit">Export to PDF</button>
         </form>
     {% else %}
-        <h2>Search Result:</h2>
-        <h2>No results found</h2>
-        <!-- Include the entered text value even if no results found -->
-        <p>Entered Name: {{ request.form['search_text'] }}</p>
+        {% if request.method == 'POST' %}
+            <h2>Search Result:</h2>
+            <h2>No results found</h2>
+            <!-- Set search_result_plain_text to "No Results Found" -->
+            <textarea name="search_result_plain_text" style="display: none;">No Results Found</textarea>
+            <!-- Include the entered text value even if no results found -->
+            <p>Entered Name: {{ request.form['search_text'] }}</p>
+        {% endif %}
     {% endif %}
 
     {% if error %}
