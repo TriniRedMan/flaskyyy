@@ -8,7 +8,6 @@
 <body>
     <h1>Name Search</h1>
      
-    
     <form action="/search" method="post">
         <label for="search_text">Enter Name:</label>
         <!-- Change input to textarea -->
@@ -38,6 +37,8 @@
             <textarea name="search_text" style="display: none;">{{ request.form['search_text'] }}</textarea>
             <button type="submit">Export to PDF</button>
         </form>
+    {% else %}
+        <h2>No results found</h2>
     {% endif %}
 
     {% if error %}
