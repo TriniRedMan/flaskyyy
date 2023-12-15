@@ -152,18 +152,16 @@ def search_name_in_database(name, column, df):
 def export_pdf():
     search_result_plain_text = request.form.get('search_result_plain_text', '')
     entered_name = request.form.get('search_text', '')  # Use 'search_text' here
-    entered_name2 = request.form.get('search_text', '')  # Use 'search_text' here
 
     # Debugging: Print entered_name
     print("Entered Name:", entered_name)
-    
+
+    if search_result_plain_text.strip() == "No Results Found":
+        return "No Results Found. Cannot create PDF."
 
     # You can print or process the plain text content as needed
     print("Search Result Plain Text:")
     print(search_result_plain_text)
-
-    if not search_result_plain_text.strip():
-        return "Empty or Invalid Plain Text. Cannot create PDF."
 
     # Create PDF from plain text content
     pdf_filename = 'search_result.pdf'
@@ -187,12 +185,11 @@ def export_pdf():
 
     user_info = f"User: {user_login}, Timestamp: {timestamp}"
 
-    
     # Add user info to the PDF
     story.append(Paragraph(user_info, styles['Normal']))
     story.append(Paragraph(title, styles['Title']))
 
-     # Parse HTML table using BeautifulSoup
+    # Parse HTML table using BeautifulSoup
     soup = BeautifulSoup(search_result_plain_text, 'html.parser')
 
     # Extract text data
@@ -216,6 +213,7 @@ def export_pdf():
     response.headers['Content-Disposition'] = f'attachment; filename={pdf_filename}'
 
     return response
+
 
 
 # Configure file uploads
