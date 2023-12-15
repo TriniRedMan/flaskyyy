@@ -121,9 +121,10 @@ def search():
         return render_template('index.html', column_names_entities=column_names_entities)
 
     # Pass the DataFrame to the search_name_in_database function
-    search_result = search_name_in_database(search_text, selected_column, df_entities)
+    search_result_plain_text, actual_search_result = search_name_in_database(search_text, selected_column, df_entities)
 
-    return render_template('index.html', column_names_entities=column_names_entities, search_result=search_result)
+    return render_template('index.html', column_names_entities=column_names_entities, search_result=search_result_plain_text, actual_search_result=actual_search_result)
+
 
 def search_name_in_database(name, column, df):
     search_name_normalized = re.sub(r'\s+', ' ', name.strip()).lower()
@@ -134,9 +135,18 @@ def search_name_in_database(name, column, df):
     column_data = df[column].fillna('').str.lower()
     matching_results = df[column_data.str.contains(search_name_normalized)]
 
-    return matching_results.to_html(index=False)
+    if matching_results.empty:
+        # If no matches, set search_result_plain_text to "No Results Found"
+        return "No Results Found", "No Results Found"
 
-    #return matching_results.to_html(index=False)
+    # Check if the only text is "<th>text</th>..."
+    only_text = "<th>text</th>\n\n<th>persons</th>\n\n<th>organizations</th>\n\n<th>locations</th>\n\n<th>dob</th>"
+    if matching_results.to_html(index=False) == only_text:
+        return "No Results Found", "No Results Found"
+
+    # Return the actual matches
+    return matching_results.to_html(index=False), matching_results.to_html(index=False)
+
 
 @app.route('/export_pdf', methods=['POST'])
 def export_pdf():
