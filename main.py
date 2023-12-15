@@ -156,9 +156,6 @@ def export_pdf():
     # Debugging: Print entered_name
     print("Entered Name:", entered_name)
 
-    if search_result_plain_text.strip() == "No Results Found":
-        return "No Results Found. Cannot create PDF."
-
     # You can print or process the plain text content as needed
     print("Search Result Plain Text:")
     print(search_result_plain_text)
@@ -189,17 +186,21 @@ def export_pdf():
     story.append(Paragraph(user_info, styles['Normal']))
     story.append(Paragraph(title, styles['Title']))
 
-    # Parse HTML table using BeautifulSoup
-    soup = BeautifulSoup(search_result_plain_text, 'html.parser')
+    if search_result_plain_text.strip() == "No Results Found":
+        # If no results found, add the corresponding text to the PDF
+        story.append(Paragraph("No Results Found", styles['Normal']))
+    else:
+        # Parse HTML table using BeautifulSoup
+        soup = BeautifulSoup(search_result_plain_text, 'html.parser')
 
-    # Extract text data
-    text_data = ""
-    for row in soup.find_all('tr'):
-        cols = [col.get_text(strip=True) for col in row.find_all(['th', 'td'])]
-        text_data += "\n".join(cols) + "\n"
+        # Extract text data
+        text_data = ""
+        for row in soup.find_all('tr'):
+            cols = [col.get_text(strip=True) for col in row.find_all(['th', 'td'])]
+            text_data += "\n".join(cols) + "\n"
 
-    # Add the search results to the PDF
-    story.append(Paragraph(text_data, styles['Normal']))
+        # Add the search results to the PDF
+        story.append(Paragraph(text_data, styles['Normal']))
 
     # Build the PDF
     pdf.build(story)
@@ -213,6 +214,7 @@ def export_pdf():
     response.headers['Content-Disposition'] = f'attachment; filename={pdf_filename}'
 
     return response
+
 
 
 
